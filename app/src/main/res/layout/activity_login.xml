@@ -2,8 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SignUpActivity">
-
+    tools:context=".LoginActivity">
 
     <TextView
         android:id="@+id/textView"
@@ -13,7 +12,7 @@
         android:layout_marginTop="100dp"
         android:layout_marginEnd="61dp"
         android:gravity="center"
-        android:text="회원가입"
+        android:text="로그인"
         android:textSize="50sp"
         android:textStyle="bold" />
 
@@ -38,13 +37,13 @@
         android:padding="8dp" />
 
     <Button
-        android:id="@+id/buttonSignUp"
+        android:id="@+id/buttonLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/editTextPassword"
         android:layout_marginTop="15dp"
         android:padding="12dp"
         android:textSize="25sp"
-        android:text="회원 가입" />
+        android:text="로그인" />
 
 </RelativeLayout>
