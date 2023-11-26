@@ -14,9 +14,15 @@ class MainActivity : AppCompatActivity() {
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.button.setOnClickListener {
+        binding.SignupButton.setOnClickListener {
             val nextIntent = Intent(this, SignUpActivity::class.java)
             startActivity(nextIntent)
+            finish()
+        }
+        binding.LoginButton.setOnClickListener {
+            val nextIntent = Intent(this, LoginActivity::class.java)
+            startActivity(nextIntent)
+            finish()
         }
     }
 }

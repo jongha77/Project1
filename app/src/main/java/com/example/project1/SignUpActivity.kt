@@ -1,5 +1,6 @@
 package com.example.project1
 
+import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.widget.Toast
@@ -28,7 +29,12 @@ class SignUpActivity : AppCompatActivity() {
                 val signUpTask = SignUpAsyncTask(object : SignUpAsyncTask.SignUpCallback {
                     override fun onSignUpResult(result: String) {
                         // Handle the sign-up result
-                        Toast.makeText(this@SignUpActivity, result, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SignUpActivity, "회원가입 성공!", Toast.LENGTH_SHORT).show()
+                        if (result == "User created successfully") {
+                            val intent = Intent(this@SignUpActivity, LoginActivity::class.java)
+                            startActivity(intent)
+                            finish() // Optional: Close the current activity if you don't want to go back to it
+                        }
                     }
                 })
 
@@ -92,6 +98,7 @@ class SignUpActivity : AppCompatActivity() {
 
         override fun onPostExecute(result: String) {
             callback.onSignUpResult(result)
+
         }
     }
 }
