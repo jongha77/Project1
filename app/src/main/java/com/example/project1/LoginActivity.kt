@@ -86,6 +86,7 @@ class LoginActivity : AppCompatActivity() {
                     finish()
                 } else{
                     Toast.makeText(this@LoginActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
+                    var user = User(binding.editTextUsername.text.toString())
                     val intent = Intent(this@LoginActivity, HomeActivity::class.java)
                     startActivity(intent)
                     finish()
