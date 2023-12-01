@@ -11,22 +11,36 @@ private const val TAG_CALENDER = "calender_fragment"
 private const val TAG_MY_PAGE = "my_page_fragment"
 
 class HomeActivity : AppCompatActivity() {
-
-    private lateinit var binding : ActivityHomeBinding
+    private lateinit var binding: ActivityHomeBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-
-        setFragment(TAG_HOME, HomeFragment())
+        setFragment(TAG_HOME, HomeFragment().apply {
+            arguments = Bundle().apply {
+                putString("username", intent.getStringExtra("username"))
+            }
+        })
 
         binding.navigationView.setOnItemSelectedListener { item ->
-            when(item.itemId) {
-                R.id.calenderFragment -> setFragment(TAG_CALENDER, CalenderFragment())
-                R.id.homeFragment -> setFragment(TAG_HOME, HomeFragment())
-                R.id.myPageFragment-> setFragment(TAG_MY_PAGE, MyPageFragment())
+            when (item.itemId) {
+                R.id.calenderFragment -> setFragment(TAG_CALENDER, CalenderFragment().apply {
+                    arguments = Bundle().apply {
+                        putString("username", intent.getStringExtra("username"))
+                    }
+                })
+                R.id.homeFragment -> setFragment(TAG_HOME, HomeFragment().apply {
+                    arguments = Bundle().apply {
+                        putString("username", intent.getStringExtra("username"))
+                    }
+                })
+                R.id.myPageFragment -> setFragment(TAG_MY_PAGE, MyPageFragment().apply {
+                    arguments = Bundle().apply {
+                        putString("username", intent.getStringExtra("username"))
+                    }
+                })
             }
             true
         }
@@ -36,7 +50,7 @@ class HomeActivity : AppCompatActivity() {
         val manager: FragmentManager = supportFragmentManager
         val fragTransaction = manager.beginTransaction()
 
-        if (manager.findFragmentByTag(tag) == null){
+        if (manager.findFragmentByTag(tag) == null) {
             fragTransaction.add(R.id.mainFrameLayout, fragment, tag)
         }
 
@@ -44,11 +58,11 @@ class HomeActivity : AppCompatActivity() {
         val home = manager.findFragmentByTag(TAG_HOME)
         val myPage = manager.findFragmentByTag(TAG_MY_PAGE)
 
-        if (calender != null){
+        if (calender != null) {
             fragTransaction.hide(calender)
         }
 
-        if (home != null){
+        if (home != null) {
             fragTransaction.hide(home)
         }
 
@@ -57,17 +71,14 @@ class HomeActivity : AppCompatActivity() {
         }
 
         if (tag == TAG_CALENDER) {
-            if (calender!=null){
+            if (calender != null) {
                 fragTransaction.show(calender)
             }
-        }
-        else if (tag == TAG_HOME) {
+        } else if (tag == TAG_HOME) {
             if (home != null) {
                 fragTransaction.show(home)
             }
-        }
-
-        else if (tag == TAG_MY_PAGE){
+        } else if (tag == TAG_MY_PAGE) {
             if (myPage != null){
                 fragTransaction.show(myPage)
             }

@@ -15,6 +15,7 @@ class MyPageFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        val username = arguments?.getString("username")
         mBinding = FragmentMyPageBinding.inflate(inflater, container, false)
 
         return binding.root

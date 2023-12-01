@@ -30,7 +30,7 @@ class CalenderFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         mBinding = FragmentCalenderBinding.inflate(inflater, container, false)
-
+        val username = arguments?.getString("username")
         //화면 설정
         setMonthView()
         //이전달 버튼 이벤트
@@ -52,6 +52,7 @@ class CalenderFragment : Fragment() {
             val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate)
             activity?.let{
                 val intent = Intent(context, EditActivity::class.java)
+                intent.putExtra("username",username)
                 intent.putExtra("selectDate",formattedDate)
                 startActivity(intent)
             }
