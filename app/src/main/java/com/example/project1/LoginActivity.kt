@@ -1,5 +1,6 @@
 package com.example.project1
 
+import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
@@ -12,10 +13,11 @@ import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
+
 class LoginActivity : AppCompatActivity() {
+
     private var mBinding: ActivityLoginBinding? = null
     private val binding get() = mBinding!!
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = ActivityLoginBinding.inflate(layoutInflater)
@@ -25,7 +27,6 @@ class LoginActivity : AppCompatActivity() {
         binding.buttonLogin.setOnClickListener {
             val username = binding.editTextUsername.text.toString()
             val password = binding.editTextPassword.text.toString()
-
             // Execute AsyncTask to perform the login in the background
             LoginTask().execute(username, password)
         }
@@ -86,8 +87,8 @@ class LoginActivity : AppCompatActivity() {
                     finish()
                 } else{
                     Toast.makeText(this@LoginActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
-                    var user = User(binding.editTextUsername.text.toString())
                     val intent = Intent(this@LoginActivity, HomeActivity::class.java)
+                    intent.putExtra("username",binding.editTextUsername.text.toString())
                     startActivity(intent)
                     finish()
                 }

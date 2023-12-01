@@ -14,7 +14,7 @@ import java.net.URL
 
 
 class EditActivity : AppCompatActivity() {
-    var user = User()
+
     private lateinit var binding : ActivityEditBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,7 +22,7 @@ class EditActivity : AppCompatActivity() {
         setContentView(binding.root)
         val intent = intent
         val selectDate = intent.getStringExtra("selectDate")
-
+        var name = intent.getStringExtra("username")
         binding.dateText.text = selectDate
 
         binding.addBtn.setOnClickListener {
@@ -30,7 +30,8 @@ class EditActivity : AppCompatActivity() {
             val time = binding.timeText.text.toString()
             val place = binding.placeText.text.toString()
             val memo = binding.memoText.text.toString()
-            val username = user.setUser()
+            val username =  name
+            val date =  selectDate
             if (title.isNotEmpty()) {
                 val scheduleTask = scheduleAsyncTask(object : scheduleAsyncTask.scheduleCallback {
                     override fun onSignUpResult(result: String) {
@@ -38,13 +39,14 @@ class EditActivity : AppCompatActivity() {
                         Toast.makeText(this@EditActivity, "등록 되었습니다", Toast.LENGTH_SHORT).show()
                         if (result == "successfully") {
                             val intent = Intent(this@EditActivity, HomeActivity::class.java)
+                            intent.putExtra("username",username)
                             startActivity(intent)
                             finish() // Optional: Close the current activity if you don't want to go back to it
                         }
                     }
                 })
 
-                scheduleTask.execute(title,time,place,memo,username)
+                scheduleTask.execute(title, time, place, memo, username, date)
             } else {
                 Toast.makeText(this@EditActivity, "제목을 입력해 주세요", Toast.LENGTH_SHORT).show()
             }
@@ -64,6 +66,7 @@ class EditActivity : AppCompatActivity() {
             val place = params[2]
             val memo = params[3]
             val username = params[4]
+            val date = params[5]
             try {
                 val urlConnection = url.openConnection() as HttpURLConnection
                 urlConnection.requestMethod = "POST"
@@ -71,7 +74,7 @@ class EditActivity : AppCompatActivity() {
                 urlConnection.doOutput = true
 
                 val outputStream = DataOutputStream(urlConnection.outputStream)
-                val data = "{\"title\":\"$title\",\"time\":\"$time\",\"place\":\"$place\",\"memo\":\"$memo\",\"username\":\"$username\"}".toByteArray(Charsets.UTF_8)
+                val data = "{\"title\":\"$title\",\"time\":\"$time\",\"place\":\"$place\",\"memo\":\"$memo\",\"username\":\"$username\",\"date\":\"$date\"}".toByteArray(Charsets.UTF_8)
                 outputStream.write(data)
                 outputStream.flush()
                 outputStream.close()
