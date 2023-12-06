@@ -36,27 +36,6 @@
             app:layout_constraintTop_toBottomOf="@+id/titleTextView"
             app:layout_constraintVertical_bias="0.045" />
 
-        <TextView
-            android:id="@+id/placeTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="TextView"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/timeTextView"
-            app:layout_constraintTop_toBottomOf="@+id/timeTextView"
-            app:layout_constraintVertical_bias="0.0" />
 
-        <TextView
-            android:id="@+id/memoTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="TextView"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/placeTextView"
-            app:layout_constraintTop_toBottomOf="@+id/placeTextView" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

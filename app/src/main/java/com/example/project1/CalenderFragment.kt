@@ -1,120 +1,186 @@
 package com.example.project1
 
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import java.time.format.DateTimeFormatter
 import com.example.project1.databinding.FragmentCalenderBinding
+import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
+import com.google.gson.reflect.TypeToken
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
 import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
-
+import java.util.*
 
 class CalenderFragment : Fragment() {
     private var mBinding: FragmentCalenderBinding? = null
     private val binding get() = mBinding!!
+    private lateinit var viewModel: ScheduleViewModel
+    private lateinit var scheduleAdapter: ScheduleCalenderAdapter
 
+    private lateinit var username: String
+    private lateinit var dayList: ArrayList<Date>
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        viewModel = ViewModelProvider(this).get(ScheduleViewModel::class.java)
+
         mBinding = FragmentCalenderBinding.inflate(inflater, container, false)
-        val username = arguments?.getString("username")
-        //화면 설정
+        username = arguments?.getString("username") ?: ""
+        dayList = dayInMonthArray()
+        val selectedDate = CalendarUtil.selectedDate.time
+        val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate)
+        // Initialize the adapter
+        scheduleAdapter = ScheduleCalenderAdapter(emptyList(),username,formattedDate)
+        binding.scheduleView.adapter = scheduleAdapter
+
+        loadData(username, getCurrentFormattedDate())
+
+        viewModel.schedules.observe(viewLifecycleOwner, Observer {
+            onDataLoaded(it)
+        })
+
         setMonthView()
-        //이전달 버튼 이벤트
+
         binding.preBtn.setOnClickListener {
-            //현재 월 -1 변수에 담기
-            CalendarUtil.selectedDate.add(Calendar.MONTH, -1)// 현재 달 -1
+            CalendarUtil.selectedDate.add(Calendar.MONTH, -1)
             setMonthView()
         }
 
-        //다음달 버튼 이벤트
         binding.nextBtn.setOnClickListener {
-            CalendarUtil.selectedDate.add(Calendar.MONTH, 1) //현재 달 +1
+            CalendarUtil.selectedDate.add(Calendar.MONTH, 1)
             setMonthView()
         }
 
-        //편집 버튼 이벤트
-        binding.editBtn.setOnClickListener{
+        binding.editBtn.setOnClickListener {
             val selectedDate = CalendarUtil.selectedDate.time
             val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate)
-            activity?.let{
+            activity?.let {
                 val intent = Intent(context, EditActivity::class.java)
-                intent.putExtra("username",username)
-                intent.putExtra("selectDate",formattedDate)
+                intent.putExtra("username", username)
+                intent.putExtra("selectDate", formattedDate)
                 startActivity(intent)
             }
         }
         return binding.root
     }
-    //날짜 화면에 보여주기
+
+    private fun getCurrentFormattedDate(): String {
+        val selectedDate = CalendarUtil.selectedDate.time
+        return SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate)
+    }
+
+    private fun onDataLoaded(schedules: List<Schedule>) {
+        scheduleAdapter.updateData(schedules)
+    }
+
     private fun setMonthView() {
-        //년월 텍스트뷰 셋팅
         binding.monthYearText.text = monthYearFromDate(CalendarUtil.selectedDate)
-
-        //날짜 생성해서 리스트에 담기
-        val dayList = dayInMonthArray()
-
-        //어댑터 초기화
         val adapter = CalendarAdapter(dayList)
-
-        //레이아웃 설정(열 7개)
-        var manager: RecyclerView.LayoutManager = GridLayoutManager(context, 7)
-
-        //레이아웃 적용
-        binding.recyclerView.layoutManager = manager
-
-        //어뎁터 적용
+        adapter.setOnDateSelectedListener { selectedDate ->
+            // Load data from the server based on the selected date
+            val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(selectedDate)
+            scheduleAdapter.clearSelectedDate()
+            loadData(username, formattedDate)
+        }
+        binding.recyclerView.layoutManager = GridLayoutManager(context, 7)
         binding.recyclerView.adapter = adapter
     }
 
-    //날짜 타입 설정(월, 년)
     private fun monthYearFromDate(calendar: Calendar): String {
-
-        var year = calendar.get(Calendar.YEAR)
-        var month = calendar.get(Calendar.MONTH) + 1
-
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH) + 1
         return "$month 월 $year"
     }
 
-
-    //날짜 생성
-    private fun dayInMonthArray(): ArrayList<Date>{
-
-        var dayList = ArrayList<Date>()
-
-        var monthCalendar = CalendarUtil.selectedDate.clone() as Calendar
-
-        //1일로 셋팅
+    private fun dayInMonthArray(): ArrayList<Date> {
+        val dayList = ArrayList<Date>()
+        val monthCalendar = CalendarUtil.selectedDate.clone() as Calendar
         monthCalendar[Calendar.DAY_OF_MONTH] = 1
-
-        //해당 달의 1일의 요일[1:일요일, 2: 월요일.... 7일: 토요일]
-        val firstDayOfMonth = monthCalendar[Calendar.DAY_OF_WEEK]-1
-
-        //요일 숫자만큼 이전 날짜로 설정
-        //예: 6월1일이 수요일이면 3만큼 이전날짜 셋팅
+        val firstDayOfMonth = monthCalendar[Calendar.DAY_OF_WEEK] - 1
         monthCalendar.add(Calendar.DAY_OF_MONTH, -firstDayOfMonth)
 
-        while(dayList.size < 42){
-
+        while (dayList.size < 42) {
             dayList.add(monthCalendar.time)
-
-            //1일씩 늘린다. 1일 -> 2일 -> 3일
             monthCalendar.add(Calendar.DAY_OF_MONTH, 1)
         }
 
         return dayList
+    }
+
+    private fun loadData(username: String?, formattedDate: String?) {
+        val calenderSchedulesTask = CalenderSchedulesTask(object : CalenderSchedulesTask.OnTaskCompleted {
+            override fun onTaskCompleted(result: List<Schedule>) {
+                if (result.isNotEmpty()) {
+                    viewModel.setSchedules(result)
+                    scheduleAdapter.updateData(result)
+                }
+            }
+        })
+        calenderSchedulesTask.execute(username, formattedDate)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mBinding = null
+    }
+}
+
+class CalenderSchedulesTask(private val listener: OnTaskCompleted) : AsyncTask<String, Void, String>() {
+
+    interface OnTaskCompleted {
+        fun onTaskCompleted(result: List<Schedule>)
+    }
+
+    override fun doInBackground(vararg params: String): String {
+        val username = params[0]
+        val date = params[1]
+        val url = URL("http://172.30.1.2:3000/schedules/$username/$date")
+
+        try {
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+
+            val bufferedReader = BufferedReader(InputStreamReader(connection.inputStream))
+            val response = StringBuilder()
+
+            var line: String?
+            while (bufferedReader.readLine().also { line = it } != null) {
+                response.append(line)
+            }
+
+            bufferedReader.close()
+            connection.disconnect()
+
+            return response.toString()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return "Error: ${e.message}"
+        }
+    }
+
+    override fun onPostExecute(result: String) {
+        try {
+            val schedulesListType = object : TypeToken<List<Schedule>>() {}.type
+            val schedulesList = Gson().fromJson<List<Schedule>>(result, schedulesListType)
+            listener.onTaskCompleted(schedulesList)
+        } catch (e: JsonSyntaxException) {
+            Log.e("FetchSchedulesTask", "Error parsing JSON: $result")
+            listener.onTaskCompleted(emptyList())
+        }
     }
 }
