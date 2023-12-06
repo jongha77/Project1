@@ -14,6 +14,7 @@ class CalendarAdapter(private val dayList: ArrayList<Date>) :
     RecyclerView.Adapter<CalendarAdapter.ItemViewHolder>() {
 
     private var selectedDate: Date? = null
+    private var onDateSelectedListener: ((Date) -> Unit)? = null
 
     class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val dayText: TextView = itemView.findViewById(R.id.dayText)
@@ -63,6 +64,11 @@ class CalendarAdapter(private val dayList: ArrayList<Date>) :
             selectedDate = dateCalendar.time
             notifyDataSetChanged()
 
+            // Notify the listener about the selected date
+            selectedDate?.let { date ->
+                onDateSelectedListener?.invoke(date)
+            }
+
             val iYear = dateCalendar.get(Calendar.YEAR)
             val iMonth = dateCalendar.get(Calendar.MONTH) + 1
             val iDay = dateCalendar.get(Calendar.DAY_OF_MONTH)
@@ -75,4 +81,10 @@ class CalendarAdapter(private val dayList: ArrayList<Date>) :
     override fun getItemCount(): Int {
         return dayList.size
     }
+
+    // Set the click listener for external use
+    fun setOnDateSelectedListener(listener: (Date) -> Unit) {
+        onDateSelectedListener = listener
+    }
+
 }
