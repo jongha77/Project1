@@ -3,6 +3,7 @@ package com.example.project1
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.project1.databinding.ActivityUpDateBinding
@@ -14,7 +15,8 @@ import java.net.URL
 
 class UpDateActivity : AppCompatActivity() {
     private lateinit var binding: ActivityUpDateBinding
-
+    private lateinit var timePicker: TimePicker
+    var selectedTime = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityUpDateBinding.inflate(layoutInflater)
@@ -29,15 +31,32 @@ class UpDateActivity : AppCompatActivity() {
         val memo = intent.getStringExtra("memo")
         val id_schedule = intent.getIntExtra("id_schedule", 0)
 
+        //시간 설정
+        timePicker = binding.timePicker
+
+        // Set a 24-hour time format
+        timePicker.is24HourView.and(true)
+
+        // 받아온 시간값 설정
+        val timeParts = time!!.split(":")
+        val hours = timeParts[0].toInt()
+        val minutes = timeParts[1].toInt()
+        timePicker.hour = hours
+        timePicker.minute = minutes
+        // Set a listener to handle the time selection
+        timePicker.setOnTimeChangedListener { view, hourOfDay, minute ->
+            // Handle the selected time
+            selectedTime = "$hourOfDay:$minute"
+        }
+
         binding.dateText.text = selectDate
         binding.titleText.setText(title)
-        binding.timeText.setText(time)
         binding.placeText.setText(place)
         binding.memoText.setText(memo)
 
         binding.UpDateBtn.setOnClickListener {
             // Call the updateSchedule method when the update button is clicked
-            updateSchedule(id_schedule, binding.titleText.text.toString(), binding.timeText.text.toString(), binding.placeText.text.toString(), binding.memoText.text.toString(), name!!, selectDate!!)
+            updateSchedule(id_schedule, binding.titleText.text.toString(), selectedTime, binding.placeText.text.toString(), binding.memoText.text.toString(), name!!, selectDate!!)
             val intent = Intent(this@UpDateActivity, HomeActivity::class.java)
             Toast.makeText(this@UpDateActivity, "수정 완료!", Toast.LENGTH_SHORT).show()
             intent.putExtra("username", name)
