@@ -3,6 +3,7 @@ package com.example.project1
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
+import android.widget.TimePicker
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.project1.databinding.ActivityEditBinding
@@ -16,6 +17,8 @@ import java.net.URL
 class EditActivity : AppCompatActivity() {
 
     private lateinit var binding : ActivityEditBinding
+    private lateinit var timePicker: TimePicker
+    var selectedTime = ""
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEditBinding.inflate(layoutInflater)
@@ -25,9 +28,21 @@ class EditActivity : AppCompatActivity() {
         var name = intent.getStringExtra("username")
         binding.dateText.text = selectDate
 
+        //시간 설정
+        timePicker = binding.timePicker
+
+        // Set a 24-hour time format
+        timePicker.is24HourView.and(true)
+
+        // Set a listener to handle the time selection
+        timePicker.setOnTimeChangedListener { view, hourOfDay, minute ->
+            // Handle the selected time
+            selectedTime = "$hourOfDay:$minute"
+        }
+
         binding.addBtn.setOnClickListener {
             val title = binding.titleText.text.toString()
-            val time = binding.timeText.text.toString()
+            val time = selectedTime
             val place = binding.placeText.text.toString()
             val memo = binding.memoText.text.toString()
             val username =  name
